@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.esm.js"></script>
+    <script nomodule src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@ionic/core/css/ionic.bundle.css" rel="stylesheet">
+</head>
+<body>
+    <ion-app>
+        <ion-header>
+            <ion-toolbar>
+                <ion-title>Date Management App</ion-title>
+            </ion-toolbar>
+        </ion-header>
+
+        <ion-content class="ion-padding">
+            
+            <!-- aktualni datum -->
+            <ion-card>
+                <ion-card-header>
+                    <ion-card-title>Aktuální datum</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                    <p id="current-date"></p>
+                </ion-card-content>
+            </ion-card>
+
+            <!-- pocet dnu -->
+            <ion-card>
+                <ion-card-header>
+                    <ion-card-title>Harmonogram akademického roku</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                    <ul id="schedule-dates"></ul>
+                </ion-card-content>
+            </ion-card>
+
+            <!-- kalkulator dni -->
+            <ion-card>
+                <ion-card-header>
+                    <ion-card-title>Počet dnů do zvoleného data</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                    <ion-datetime id="selected-date" presentation="date"></ion-datetime>
+                    <ion-button onclick="calculateDays()">Spočítat</ion-button>
+                    <p id="days-until"></p>
+                </ion-card-content>
+            </ion-card>
+
+            <!-- horoskop -->
+            <ion-card>
+                <ion-card-header>
+                    <ion-card-title>Znamení horoskopu</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                    <p id="horoscope-sign"></p>
+                    <img id="horoscope-image" src="" alt="Znamení zvěrokruhu" style="width: 150px; height: 150px; display: none;">
+                </ion-card-content>
+            </ion-card>
+
+        </ion-content>
+    </ion-app>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("current-date").innerText = new Date().toLocaleDateString("cs-CZ");
+            calculateScheduleDays();
+        });
+
+        const schedule = [
+            { date: "2024-09-01", event: "Začátek akademického roku" },
+            { date: "2024-09-16", event: "Začátek výuky v zimním semestru" },
+			{ date: "2024-12-14", event: "Konec výuky v zimním semestru" },
+            { date: "2024-12-23", event: "Vánoční prázdniny" },
+            { date: "2025-02-17", event: "Začátek výuky v letním semestru" },
+			{ date: "2025-03-11", event: "Kariéra PLUS" },
+			{ date: "2025-04-23", event: "Sportovní den" },
+			{ date: "2025-05-17", event: "Konec výuky v letním semestru" },
+			{ date: "2025-08-31", event: "Konec akademického roku" },
+        ];
+
+        function calculateScheduleDays() {
+            const today = new Date();
+            const scheduleList = document.getElementById("schedule-dates");
+            scheduleList.innerHTML = "";
+            schedule.forEach(event => {
+                const eventDate = new Date(event.date);
+                const diffTime = eventDate - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                const listItem = document.createElement("li");
+                listItem.textContent = `${event.event}: ${diffDays} dní`;
+                scheduleList.appendChild(listItem);
+            });
+        }
+
+        function calculateDays() {
+            const selectedDate = new Date(document.getElementById("selected-date").value);
+            const today = new Date();
+            const diffTime = selectedDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            document.getElementById("days-until").innerText = `Počet dnů: ${diffDays}`;
+            determineZodiac(selectedDate);
+        }
+
+        function determineZodiac(date) {
+            const day = date.getDate();
+            const month = date.getMonth() + 1;
+            const zodiacSigns = [
+                { sign: "Kozoroh", start: "12-22", end: "01-20" },
+                { sign: "Vodnar", start: "01-21", end: "02-20" },
+                { sign: "Ryby", start: "02-21", end: "03-20" },
+                { sign: "Beran", start: "03-21", end: "04-20" },
+                { sign: "Byk", start: "04-21", end: "05-21" },
+                { sign: "Blizenci", start: "05-22", end: "06-21" },
+                { sign: "Rak", start: "06-22", end: "07-22" },
+                { sign: "Lev", start: "07-23", end: "08-22" },
+                { sign: "Panna", start: "08-23", end: "09-22" },
+                { sign: "Vahy", start: "09-23", end: "10-23" },
+                { sign: "Stir", start: "10-24", end: "11-22" },
+                { sign: "Strelec", start: "11-23", end: "12-21" },
+            ];
+            
+            let signName = "";
+            zodiacSigns.forEach(z => {
+                const [startMonth, startDay] = z.start.split("-").map(Number);
+                const [endMonth, endDay] = z.end.split("-").map(Number);
+                if ((month === startMonth && day >= startDay) || (month === endMonth && day <= endDay)) {
+                    signName = z.sign;
+                }
+            });
+            
+            document.getElementById("horoscope-sign").innerText = `Znamení: ${signName}`;
+            const imagePath = `img/${signName}.png`;
+            const horoscopeImage = document.getElementById("horoscope-image");
+            horoscopeImage.src = imagePath;
+            horoscopeImage.style.display = "block";
+        }
+    </script>
+</body>
+</html>
